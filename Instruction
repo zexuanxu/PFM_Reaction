@@ -1,0 +1,103 @@
+Phase field model of solute precipitation / dissolution problem. 
+Author: Zexuan Xu, Idaho National Laboratory
+Date: August 22, 2014
+Contact: Zexuan Xu (xuzexuan@gmail.com) or Hai Huang (hai.huang@inl.gov)
+
+Instruction
+
+1. Governing equations:
+
+Dimensional equations:
+Please see equation (24), (25) and (54) in Xu and Meakin, 2008, Phase-field modeling of solute prcipitation and dissolution, The Journal of Chemical Physics, 129, 014705.
+
+Dimensionless equations:
+Please see equation (12)-(14) in Xu and Meakin, 2011, Phase-field modeling of two-dimensional solute precipitation/dissolution: Solid fingers and diffusion-limited precipitation, The Journal of Chemical Physics, 129, 014705.
+
+Weak forms:
+Please see the document "Equations of the phase field model of reaction.docx" in directory doc.
+
+
+2. Compile and Execute
+
+To compile and generate the executable file, simply type:
+
+	make 
+
+or,
+ 
+	make -j[jobs]	// [jobs] is the number of jobs to run simultaneously.
+
+the executable file ./pfm_reaction-opt will be generated.
+
+To run the code:
+
+	mpirun -n -[nodes] pfm_reaction-opt -i [input file name]	// Parellel running
+
+or,
+
+	./pfm_reaction-opt -i [input file name]				// Serial running
+
+run tests, simply type:
+ 
+	./run_tests
+
+
+3. Code framework
+
+directory doc
+	Equations of the phase field mode of reaction.docx	
+	// Dimensional, dimensionless equations and the weak forms
+
+	Phase-field modeling of solute precipitation dissolution using MOOSE, A finite element method.pptx	
+	// Powerpoint slices to introduce the equations, methods and results	
+
+directory lib: library files						
+directory include: C++ header files
+directory src: C++ source code files
+
+	auxkernel:	
+		Curvature		// Note: this auxkernel and auxvariable doesn't work for curvature calculation.
+	base:	
+		PFM_ReactionsApp	// This is the MooseApp file
+	ics:
+		SmoothCircleIC		// Initial condition. This file is copied from ./moose/modules/phase_field/src/ics
+	kernels:			
+		ACAdd
+		ACAdd_dimensionless
+		ACGrad
+		ACGrad_dimensionless
+		ACLoc
+		ACLoc_dimensionless
+		ACTimeDerivative
+		ConcAdd
+		ConcAdd_dimensionless
+		ConcDiffusion
+		Convection		// Copy from ./moose/module/misc/src
+		Diffusion		// Copy from ./moose/framework/src/kernels
+		RandomNoise
+		RandomNoiseConc
+		TimeDerivative		// Copy from ./moose/framework/src/kernels
+
+		// AC* kernels mean the Allen-Cahn phase field equation.
+		// Conc* kernels mean the concentration diffusion/reaction equation.
+		// For more detail, please refer to each kernel file.
+
+	materials:
+		ACMaterials		// All parameters needed in the Allan-Cahn phase field equation (dimensional case)
+		ConcMaterials		// All parameters needed in the concentration diffusion/reaction equation (dimensional case)
+		DimensionlessMaterials.C	// All parameters needed in both two equations (Dimensionless case)
+
+directory examples: some examples	 
+directory tests: some test cases    
+	// The examples and tests cases are almost the same.
+	// The only difference is that the test cases are only 2 to 3 time steps (because the test cases should be short to run) 
+		
+	dendrite_growth_highreaction	// Dendrite growth case with high reaction rate (compare with diffusivity)
+	dendrite_growth_lowreaction	// Dendrite growth case with low reaction rate (compare with diffusivity)
+	dendrite_growth_sidebranch	// Dendrite growth case with high reaction rate and random noise to generate sidebranch
+	dissolution			// A dissolution case
+	dissolution_point		// A point source dissolution case
+	dissolution_point_convection	// A point source dissolution case with convection
+
+END
+

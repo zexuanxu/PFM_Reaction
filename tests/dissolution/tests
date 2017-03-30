@@ -1,0 +1,7 @@
+[Tests]
+  [./test]
+    type = 'Exodiff'
+    input = 'dissolution.i'
+    exodiff = 'out_dissolution.e'
+  [../]
+[]
